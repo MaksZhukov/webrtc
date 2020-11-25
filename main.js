@@ -4,11 +4,20 @@ let btnConnect = document.getElementById('btnConnect');
 let inputText = document.getElementById('text');
 let btnSendText = document.getElementById('btnSendText');
 let chat = document.getElementById('chat');
+let btnCall = document.getElementById('btnCall');
+let btnAnswer = document.getElementById('btnAnswer');
+let myVideo = document.getElementById('myVideo');
+let remVideo = document.getElementById('remVideo');
 let connection = null;
+let peerCall = null;
 
 let peer = new Peer();
 peer.on('open', function (id) {
     yourPeerID.textContent = id;
+});
+peer.on('call', (call) => {
+    peerCall = call;
+    alert('Input call');
 });
 
 peer.on('connection', (conn) => {
@@ -38,4 +47,40 @@ btnSendText.addEventListener('click', () => {
     let p = document.createElement('p');
     p.append('You ', inputText.value);
     chat.append(p);
+});
+
+btnCall.addEventListener('click', () => {
+    navigator.mediaDevices
+        .getUserMedia({ audio: true, video: true })
+        .then((mediaStream) => {
+            peerCall = peer.call(inputPeerID.value, mediaStream);
+            peerCall.on('stream', (stream) => {
+                remVideo.srcObject = stream;
+                remVideo.onloadedmetadata = () => {
+                    remVideo.play();
+                };
+            });
+            myVideo.srcObject = mediaStream;
+            myVideo.onloadedmetadata = () => {
+                myVideo.play();
+            };
+        });
+});
+
+btnAnswer.addEventListener('click', () => {
+    navigator.mediaDevices
+        .getUserMedia({ audio: true, video: true })
+        .then((mediaStream) => {
+            peerCall.answer(mediaStream);
+            myVideo.srcObject = mediaStream;
+            myVideo.onloadedmetadata = () => {
+                myVideo.play();
+            };
+            setTimeout(() => {
+                remVideo.srcObject = peerCall.remoteStream;
+                remVideo.onloadedmetadata = () => {
+                    remVideo.play();
+                };
+            }, 1500);
+        });
 });

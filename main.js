@@ -8,6 +8,7 @@ let btnCall = document.getElementById('btnCall');
 let btnAnswer = document.getElementById('btnAnswer');
 let myVideo = document.getElementById('myVideo');
 let remVideo = document.getElementById('remVideo');
+let btnClose = document.getElementById('btnClose');
 let connection = null;
 let peerCall = null;
 
@@ -22,6 +23,7 @@ peer.on('call', (call) => {
 
 peer.on('connection', (conn) => {
     alert('connected');
+    inputPeerID.value = conn.peer;
     connection = conn;
     connection.on('data', function (data) {
         let p = document.createElement('p');
@@ -60,6 +62,9 @@ btnCall.addEventListener('click', () => {
                     remVideo.play();
                 };
             });
+            peerCall.on('close', () => {
+                alert('connection closed');
+            });
             myVideo.srcObject = mediaStream;
             myVideo.onloadedmetadata = () => {
                 myVideo.play();
@@ -72,6 +77,9 @@ btnAnswer.addEventListener('click', () => {
         .getUserMedia({ audio: true, video: true })
         .then((mediaStream) => {
             peerCall.answer(mediaStream);
+            peerCall.on('close', () => {
+                alert('connection closed');
+            });
             myVideo.srcObject = mediaStream;
             myVideo.onloadedmetadata = () => {
                 myVideo.play();
@@ -83,4 +91,8 @@ btnAnswer.addEventListener('click', () => {
                 };
             }, 1500);
         });
+});
+
+btnClose.addEventListener('click', () => {
+    peerCall.close();
 });

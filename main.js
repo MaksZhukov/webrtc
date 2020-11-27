@@ -6,6 +6,7 @@ let btnSendText = document.getElementById('btnSendText');
 let chat = document.getElementById('chat');
 let btnCall = document.getElementById('btnCall');
 let btnAnswer = document.getElementById('btnAnswer');
+let btnShareScreen = document.getElementById('btnShareScreen');
 let myVideo = document.getElementById('myVideo');
 let remVideo = document.getElementById('remVideo');
 let btnClose = document.getElementById('btnClose');
@@ -91,6 +92,25 @@ btnAnswer.addEventListener('click', () => {
                 };
             }, 1500);
         });
+});
+
+btnShareScreen.addEventListener('click', () => {
+    navigator.mediaDevices.getDisplayMedia().then((mediaStream) => {
+        peerCall = peer.call(inputPeerID.value, mediaStream);
+        peerCall.on('stream', (stream) => {
+            remVideo.srcObject = stream;
+            remVideo.onloadedmetadata = () => {
+                remVideo.play();
+            };
+        });
+        peerCall.on('close', () => {
+            alert('connection closed');
+        });
+        myVideo.srcObject = mediaStream;
+        myVideo.onloadedmetadata = () => {
+            myVideo.play();
+        };
+    });
 });
 
 btnClose.addEventListener('click', () => {

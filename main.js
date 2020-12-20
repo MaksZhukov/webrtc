@@ -20,6 +20,8 @@ peer.on('open', function (id) {
 peer.on('call', (call) => {
     peerCall = call;
     alert('Input call');
+    myVideo.setAttribute('poster', 'cat.gif');
+    remVideo.srcObject = null;
 });
 
 peer.on('connection', (conn) => {
@@ -53,6 +55,7 @@ btnSendText.addEventListener('click', () => {
 });
 
 btnCall.addEventListener('click', () => {
+    remVideo.setAttribute('poster', 'cat.gif');
     navigator.mediaDevices
         .getUserMedia({ audio: true, video: true })
         .then((mediaStream) => {

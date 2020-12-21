@@ -20,7 +20,7 @@ peer.on('open', function (id) {
 peer.on('call', (call) => {
     peerCall = call;
     alert('Input call');
-    myVideo.setAttribute('poster', 'cat.gif');
+    remVideo.setAttribute('poster', 'cat.gif');
     remVideo.srcObject = null;
 });
 
@@ -61,6 +61,7 @@ btnCall.addEventListener('click', () => {
         .then((mediaStream) => {
             peerCall = peer.call(inputPeerID.value, mediaStream);
             peerCall.on('stream', (stream) => {
+                remVideo.removeAttribute('poster');
                 remVideo.srcObject = stream;
                 remVideo.onloadedmetadata = () => {
                     remVideo.play();
@@ -92,18 +93,26 @@ btnAnswer.addEventListener('click', () => {
                 remVideo.srcObject = peerCall.remoteStream;
                 remVideo.onloadedmetadata = () => {
                     remVideo.play();
+                    remVideo.removeAttribute('poster');
                 };
             }, 1500);
         });
 });
 
 btnShareScreen.addEventListener('click', () => {
-    navigator.mediaDevices.getDisplayMedia().then((mediaStream) => {
-        peerCall = peer.call(inputPeerID.value, mediaStream);
+    navigator.mediaDevices.getDisplayMedia().then(async (mediaStream) => {
+        let [videoTrack] = mediaStream.getVideoTracks();
+        const audioStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+        });
+        let [audioTrack] = audioStream.getAudioTracks();
+        let combinedStream = new MediaStream([videoTrack, audioTrack]);
+        peerCall = peer.call(inputPeerID.value, combinedStream);
         peerCall.on('stream', (stream) => {
             remVideo.srcObject = stream;
             remVideo.onloadedmetadata = () => {
                 remVideo.play();
+                remVideo.removeAttribute('poster');
             };
         });
         peerCall.on('close', () => {
